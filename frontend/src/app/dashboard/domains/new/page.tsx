@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,10 +24,26 @@ interface DnsRecord {
 export default function NewDomainWizardPage() {
   const [step, setStep] = useState<Step>("create");
   const [domain, setDomain] = useState("");
-  const [hostingAccountId, setHostingAccountId] = useState("1");
+  const [hostingAccountId, setHostingAccountId] = useState("");
   const [createdDomain, setCreatedDomain] = useState<any>(null);
   const [dnsRecords, setDnsRecords] = useState<DnsRecord[]>([]);
   const [verifyResult, setVerifyResult] = useState<any>(null);
+
+  // Fetch hosting accounts to auto-select
+  const { data: hostingData } = useQuery({
+    queryKey: ["hosting-accounts"],
+    queryFn: async () => {
+      const { data } = await api.get("/hosting");
+      return data;
+    },
+  });
+
+  // Auto-select first active account
+  const accounts = hostingData?.data || [];
+  if (!hostingAccountId && accounts.length > 0) {
+    const active = accounts.find((a: any) => a.status === "active");
+    if (active) setHostingAccountId(String(active.id));
+  }
 
   const createDomain = useMutation({
     mutationFn: async () => {
