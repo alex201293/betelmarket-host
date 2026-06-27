@@ -23,9 +23,20 @@ export default function SitesPage() {
     },
   });
 
+  const { data: hostingData } = useQuery({
+    queryKey: ["hosting-for-temp"],
+    queryFn: async () => {
+      const { data } = await api.get("/hosting");
+      return data;
+    },
+  });
+
   const createTempDomain = useMutation({
     mutationFn: async () => {
-      const { data } = await api.post("/temp-domains", { hosting_account_id: 1 });
+      const accounts = hostingData?.data || [];
+      const active = accounts.find((a: any) => a.status === "active");
+      if (!active) throw new Error("No active hosting account found");
+      const { data } = await api.post("/temp-domains", { hosting_account_id: active.id });
       return data;
     },
     onSuccess: (data) => {
