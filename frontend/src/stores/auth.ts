@@ -11,7 +11,7 @@ export interface User {
 }
 
 // Demo mode flag - set to true to bypass API auth
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 const DEMO_USER: User = {
   id: 1,

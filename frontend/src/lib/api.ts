@@ -20,7 +20,7 @@ import {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 // Demo mode flag - matches auth store
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 export const api = axios.create({
   baseURL: API_URL,
