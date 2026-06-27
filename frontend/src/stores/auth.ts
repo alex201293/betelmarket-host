@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
+import { useEffect, useState } from "react";
 
 export interface User {
   id: number;
@@ -9,18 +10,6 @@ export interface User {
   status: string;
   hosting_accounts?: any[];
 }
-
-// Demo mode flag - set to true to bypass API auth
-const DEMO_MODE = false;
-
-const DEMO_USER: User = {
-  id: 1,
-  name: "Admin Demo",
-  email: "admin@betelmarket.com",
-  role: "super_admin",
-  status: "active",
-  hosting_accounts: [],
-};
 
 interface AuthState {
   user: User | null;
@@ -34,21 +23,11 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: DEMO_MODE ? DEMO_USER : null,
-  token: DEMO_MODE
-    ? "demo-token"
-    : typeof window !== "undefined"
-    ? localStorage.getItem("token")
-    : null,
+  user: null,
+  token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
   isLoading: false,
 
   login: async (email: string, password: string) => {
-    if (DEMO_MODE) {
-      const demoToken = "demo-token";
-      localStorage.setItem("token", demoToken);
-      set({ token: demoToken, user: DEMO_USER, isLoading: false });
-      return;
-    }
     set({ isLoading: true });
     try {
       const { data } = await api.post("/auth/login", { email, password });
@@ -61,12 +40,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   register: async (name: string, email: string, password: string) => {
-    if (DEMO_MODE) {
-      const demoToken = "demo-token";
-      localStorage.setItem("token", demoToken);
-      set({ token: demoToken, user: { ...DEMO_USER, name, email }, isLoading: false });
-      return;
-    }
     set({ isLoading: true });
     try {
       const { data } = await api.post("/auth/register", {
@@ -84,22 +57,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
-    if (!DEMO_MODE) {
-      try {
-        await api.post("/auth/logout");
-      } catch {
-        // Ignore errors on logout
-      }
+    try {
+      await api.post("/auth/logout");
+    } catch {
+      // Ignore errors on logout
     }
     localStorage.removeItem("token");
     set({ token: null, user: null });
   },
 
   fetchUser: async () => {
-    if (DEMO_MODE) {
-      set({ user: DEMO_USER, isLoading: false });
-      return;
-    }
     set({ isLoading: true });
     try {
       const { data } = await api.get("/auth/me");
