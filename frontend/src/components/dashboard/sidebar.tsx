@@ -42,6 +42,7 @@ export function Sidebar() {
 
   const managementNav = [
     { name: t.sidebar.clients, href: "/dashboard/clients", icon: Users, roles: ["super_admin", "reseller"] },
+    { name: "Hosting", href: "/dashboard/hosting", icon: Package, roles: ["super_admin", "reseller"] },
     { name: t.sidebar.plans, href: "/dashboard/plans", icon: Package, roles: ["super_admin"] },
     { name: t.sidebar.dns, href: "/dashboard/dns", icon: Shield },
     { name: "Databases", href: "/dashboard/databases", icon: Database },
