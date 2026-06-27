@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://5.189.158.49:8000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://bpanel.betelmarket.com/api";
 
 export const api = axios.create({
   baseURL: API_URL,
