@@ -43,6 +43,11 @@ class MailController extends Controller
 
         $domain = Domain::with('hostingAccount.plan')->findOrFail($request->domain_id);
 
+        // Cannot create email on temporary domains
+        if ($domain->is_temporary) {
+            return response()->json(['message' => 'Cannot create email accounts on temporary domains. Connect a real domain first.'], 422);
+        }
+
         // Check plan limits
         $currentMailboxes = MailAccount::where('domain_id', $domain->id)->count();
         if ($currentMailboxes >= $domain->hostingAccount->plan->max_mailboxes) {

@@ -39,7 +39,7 @@ export default function MailPage() {
     },
   });
 
-  const domainsList = (domainsData?.data || []).filter((d: any) => d.status === "active");
+  const domainsList = (domainsData?.data || []).filter((d: any) => d.status === "active" && !d.is_temporary);
 
   const createMail = useMutation({
     mutationFn: async () => {
