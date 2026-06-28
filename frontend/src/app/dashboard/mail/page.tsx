@@ -21,7 +21,7 @@ export default function MailPage() {
   const [showConfig, setShowConfig] = useState<string | null>(null);
   const [changePass, setChangePass] = useState<{ id: number; email: string } | null>(null);
   const [newPassword, setNewPassword] = useState("");
-  const [form, setForm] = useState({ domain_id: "1", account: "", password: "", quota_mb: "500" });
+  const [form, setForm] = useState({ domain_id: "", account: "", password: "", quota_mb: "500" });
 
   const { data, isLoading } = useQuery({
     queryKey: ["emails"],
@@ -30,6 +30,16 @@ export default function MailPage() {
       return data;
     },
   });
+
+  const { data: domainsData } = useQuery({
+    queryKey: ["domains-for-mail"],
+    queryFn: async () => {
+      const { data } = await api.get("/domains");
+      return data;
+    },
+  });
+
+  const domainsList = (domainsData?.data || []).filter((d: any) => d.status === "active");
 
   const createMail = useMutation({
     mutationFn: async () => {
@@ -142,7 +152,12 @@ export default function MailPage() {
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Domain</label>
-                  <Input placeholder="Domain ID" type="number" value={form.domain_id} onChange={(e) => setForm({ ...form, domain_id: e.target.value })} required />
+                  <select className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm" value={form.domain_id} onChange={(e) => setForm({ ...form, domain_id: e.target.value })} required>
+                    <option value="">Select domain...</option>
+                    {domainsList.map((d: any) => (
+                      <option key={d.id} value={d.id}>{d.domain}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Account name</label>
