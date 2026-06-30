@@ -68,6 +68,15 @@ export default function MailPage() {
   const copyText = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copied"); };
   const getDomain = (email: string) => email.split("@")[1] || "domain.com";
 
+  const { data: hostingData } = useQuery({
+    queryKey: ["hosting-for-mail-limits"],
+    queryFn: async () => { const { data } = await api.get("/hosting"); return data; },
+  });
+
+  const account = (hostingData?.data || [])[0];
+  const maxMailboxes = (account?.plan?.max_mailboxes || 0) + (account?.extra_mailboxes || 0);
+  const usedMailboxes = emails.length;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -75,8 +84,31 @@ export default function MailPage() {
           <h1 className="text-2xl font-bold text-gray-900">Email Accounts</h1>
           <p className="mt-1 text-sm text-gray-500">Manage mailboxes, passwords, and access webmail.</p>
         </div>
-        <Button onClick={() => setShowCreate(!showCreate)}><Plus className="mr-2 h-4 w-4" /> Create Mailbox</Button>
+        <Button onClick={() => setShowCreate(!showCreate)} disabled={maxMailboxes > 0 && usedMailboxes >= maxMailboxes}>
+          <Plus className="mr-2 h-4 w-4" /> Create Mailbox
+        </Button>
       </div>
+
+      {/* Usage info */}
+      {maxMailboxes > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+          <Mail className="h-5 w-5 text-brand-600" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-900">
+              {usedMailboxes} / {maxMailboxes} email accounts used
+            </p>
+            <div className="mt-1 h-2 w-48 rounded-full bg-gray-200">
+              <div
+                className={`h-full rounded-full ${usedMailboxes >= maxMailboxes ? "bg-red-500" : "bg-brand-500"}`}
+                style={{ width: `${Math.min((usedMailboxes / maxMailboxes) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+          {usedMailboxes >= maxMailboxes && (
+            <span className="text-xs font-medium text-red-600">Limit reached — contact admin to upgrade</span>
+          )}
+        </div>
+      )}
 
       {/* Create form */}
       {showCreate && (
