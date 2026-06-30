@@ -84,7 +84,7 @@ export default function MailPage() {
           <CardHeader><CardTitle>Create New Mailbox</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={(e) => { e.preventDefault(); createMail.mutate(); }} className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Domain</label>
                   <select className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm" value={form.domain_id} onChange={(e) => setForm({ ...form, domain_id: e.target.value })} required>
@@ -99,10 +99,6 @@ export default function MailPage() {
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
                   <PasswordInput placeholder="Min 8 chars" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">Quota (MB)</label>
-                  <Input type="number" value={form.quota_mb} onChange={(e) => setForm({ ...form, quota_mb: e.target.value })} />
                 </div>
               </div>
               <div className="flex gap-2">
