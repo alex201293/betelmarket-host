@@ -56,8 +56,8 @@ class MailController extends Controller
             return response()->json(['message' => "Mailbox limit reached ({$currentMailboxes}/{$maxMailboxes}). Upgrade your plan or request more."], 422);
         }
 
-        // Get mailbox quota from hosting account settings (admin-configured)
-        $quotaMb = $account->real_mailbox_quota_mb ?? 500;
+        // Get mailbox quota: extras override > plan default
+        $quotaMb = $account->real_mailbox_quota_mb ?? $account->plan->mailbox_quota_mb ?? 1024;
 
         $email = $request->account . '@' . $domain->domain;
 
