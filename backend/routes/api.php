@@ -191,6 +191,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{domain}/reset-password', [WordPressController::class, 'resetPassword']);
         Route::post('/{domain}/maintenance', [WordPressController::class, 'maintenance']);
         Route::post('/{domain}/flush-cache', [WordPressController::class, 'flushCache']);
+        Route::post('/{domain}/uninstall', [WordPressController::class, 'uninstall']);
     });
 
     // ─── Security ─────────────────────────────────────────────

@@ -102,6 +102,15 @@ export default function WordPressPage() {
     onSuccess: () => toast.success("Maintenance mode toggled"),
   });
 
+  const uninstallWp = useMutation({
+    mutationFn: () => api.post(`/wordpress/${domainId}/uninstall`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wordpress", domainId] });
+      toast.success("WordPress uninstalled. You can reinstall anytime.");
+    },
+    onError: () => toast.error("Failed to uninstall"),
+  });
+
   // Demo mock data
   const isInstalled = wpStatus?.installed ?? true;
   const wpVersion = wpStatus?.version || "6.5.2";
@@ -297,6 +306,26 @@ export default function WordPressPage() {
             </div>
             <Button onClick={() => resetPassword.mutate()} disabled={!newPassword || resetPassword.isPending}>
               <Key className="mr-1 h-4 w-4" /> Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Uninstall */}
+      <Card className="border-red-200">
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-red-700">Uninstall WordPress</h3>
+              <p className="text-sm text-gray-500 mt-1">This will delete all WordPress files and database. You can reinstall later.</p>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => { if (confirm("Are you sure? This will delete all WordPress files and data.")) uninstallWp.mutate(); }}
+              disabled={uninstallWp.isPending}
+            >
+              <Trash2 className="mr-1 h-4 w-4" />
+              {uninstallWp.isPending ? "Uninstalling..." : "Uninstall WordPress"}
             </Button>
           </div>
         </CardContent>

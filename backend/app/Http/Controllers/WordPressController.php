@@ -160,4 +160,29 @@ class WordPressController extends Controller
 
         return response()->json($result);
     }
+
+    /**
+     * Uninstall WordPress from a domain.
+     */
+    public function uninstall(Domain $domain): JsonResponse
+    {
+        $username = $domain->hostingAccount->hestia_username;
+        $docRoot = "/home/{$username}/web/{$domain->domain}/public_html";
+
+        // Remove all WordPress files
+        exec("rm -rf {$docRoot}/*");
+        exec("rm -rf {$docRoot}/.htaccess");
+
+        // Drop the WordPress database
+        exec("wp db drop --yes --path={$docRoot} --allow-root 2>&1");
+
+        // Create a blank index
+        file_put_contents("{$docRoot}/index.html", "<html><body><h1>Site ready for a new installation</h1></body></html>");
+        exec("chown {$username}:{$username} {$docRoot}/index.html");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'WordPress uninstalled. You can reinstall it anytime.',
+        ]);
+    }
 }
