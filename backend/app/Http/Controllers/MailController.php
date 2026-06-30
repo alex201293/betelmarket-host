@@ -48,18 +48,23 @@ class MailController extends Controller
             return response()->json(['message' => 'Cannot create email accounts on temporary domains. Connect a real domain first.'], 422);
         }
 
-        // Check plan limits
-        $currentMailboxes = MailAccount::where('domain_id', $domain->id)->count();
-        if ($currentMailboxes >= $domain->hostingAccount->plan->max_mailboxes) {
-            return response()->json(['message' => 'Mailbox limit reached for this plan.'], 422);
+        // Check plan limits (plan + extras)
+        $account = $domain->hostingAccount;
+        $maxMailboxes = $account->plan->max_mailboxes + ($account->extra_mailboxes ?? 0);
+        $currentMailboxes = MailAccount::whereHas('domain', fn($q) => $q->where('hosting_account_id', $account->id))->where('status', '!=', 'deleted')->count();
+        if ($currentMailboxes >= $maxMailboxes) {
+            return response()->json(['message' => "Mailbox limit reached ({$currentMailboxes}/{$maxMailboxes}). Upgrade your plan or request more."], 422);
         }
+
+        // Get mailbox quota from hosting account settings (admin-configured)
+        $quotaMb = $account->real_mailbox_quota_mb ?? 500;
 
         $email = $request->account . '@' . $domain->domain;
 
         $mailAccount = MailAccount::create([
             'domain_id' => $domain->id,
             'email' => $email,
-            'quota_mb' => $request->get('quota_mb', 500),
+            'quota_mb' => $quotaMb,
             'status' => 'active',
             'password_hash' => Hash::make($request->password),
         ]);
