@@ -39,10 +39,6 @@ npm run dev
 ## Default Credentials (Seeder)
 
 | Role | Email | Password |
-|------|-------|----------|
-| Super Admin | admin@betelmarket.com | password123 |
-| Reseller | reseller@betelmarket.com | password123 |
-| Client | client@betelmarket.com | password123 |
 
 ## API Endpoints
 
