@@ -47,6 +47,7 @@ export default function MailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["emails"] });
+      queryClient.invalidateQueries({ queryKey: ["hosting-for-mail-limits"] });
       toast.success("Mailbox created");
       setShowCreate(false);
       setForm({ domain_id: "", account: "", password: "", quota_mb: "500" });
@@ -62,7 +63,7 @@ export default function MailPage() {
 
   const deleteMail = useMutation({
     mutationFn: async (id: number) => { await api.delete("/emails/" + id); },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["emails"] }); toast.success("Deleted"); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["emails"] }); queryClient.invalidateQueries({ queryKey: ["hosting-for-mail-limits"] }); toast.success("Deleted"); },
   });
 
   const copyText = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copied"); };

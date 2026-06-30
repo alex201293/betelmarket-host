@@ -23,6 +23,7 @@ class MailController extends Controller
         // Everyone only sees their own mail accounts
         // Admin uses "Login as" to manage client emails
         $query->whereHas('domain.hostingAccount', fn($q) => $q->where('user_id', $user->id));
+        $query->where('status', '!=', 'deleted');
 
         $mailAccounts = $query->paginate(20);
 
