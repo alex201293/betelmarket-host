@@ -85,6 +85,18 @@ export default function HostingPage() {
   const usersList = users?.data || [];
   const plansList = plans || [];
 
+  const loginAsClient = async (account: HostingAccount) => {
+    try {
+      const { data } = await api.post(`/hosting/${account.id}/login-as`);
+      // Save admin token, set client token, redirect
+      localStorage.setItem("admin_token", localStorage.getItem("token") || "");
+      localStorage.setItem("token", data.token);
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      toast.error("Failed to login as client");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -196,6 +208,9 @@ export default function HostingPage() {
                       </td>
                       <td className="px-5 py-3 text-right">
                         <div className="flex justify-end gap-1">
+                          <Button size="sm" variant="ghost" title="Login as client" onClick={() => loginAsClient(account)}>
+                            <User className="h-3.5 w-3.5 text-blue-600" />
+                          </Button>
                           <Button size="sm" variant="ghost" title="Change Plan" onClick={() => { setEditAccount(account); setShowCreate(false); setUpgradePlanId(""); }}>
                             <ArrowUpCircle className="h-3.5 w-3.5 text-brand-600" />
                           </Button>

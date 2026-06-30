@@ -28,6 +28,9 @@ class HostingAccount extends Model
         'scale_increment_mb',
         'scale_max_mb',
         'admin_notes',
+        'extra_mailboxes',
+        'extra_domains',
+        'extra_disk_mb',
     ];
 
     public function user(): BelongsTo

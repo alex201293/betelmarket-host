@@ -59,13 +59,16 @@ class HostingController extends Controller
     }
 
     /**
-     * Update a hosting account (change plan, status, etc).
+     * Update a hosting account (change plan, status, custom limits).
      */
     public function update(Request $request, HostingAccount $hostingAccount): JsonResponse
     {
         $request->validate([
             'plan_id' => 'sometimes|exists:plans,id',
             'status' => 'sometimes|in:active,suspended,pending,deleted',
+            'extra_mailboxes' => 'sometimes|integer|min:0',
+            'extra_domains' => 'sometimes|integer|min:0',
+            'extra_disk_mb' => 'sometimes|integer|min:0',
         ]);
 
         if ($request->has('plan_id')) {
@@ -78,8 +81,6 @@ class HostingController extends Controller
 
         if ($request->has('status')) {
             $hostingAccount->update(['status' => $request->status]);
-
-            // Sync with HestiaCP
             $username = $hostingAccount->hestia_username;
             if ($request->status === 'suspended') {
                 exec("/usr/local/hestia/bin/v-suspend-user {$username} 2>&1");
@@ -88,6 +89,27 @@ class HostingController extends Controller
             }
         }
 
+        // Custom extras (override plan limits for this specific account)
+        $extras = $request->only(['extra_mailboxes', 'extra_domains', 'extra_disk_mb']);
+        if (!empty($extras)) {
+            $hostingAccount->update($extras);
+        }
+
         return response()->json($hostingAccount->fresh()->load(['user', 'plan']));
+    }
+
+    /**
+     * Login as client (impersonate) - generates a token for the client.
+     */
+    public function loginAs(HostingAccount $hostingAccount): JsonResponse
+    {
+        $user = $hostingAccount->user;
+        $token = $user->createToken('admin-impersonate', [$user->role])->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $user,
+            'message' => "Logged in as {$user->name}",
+        ]);
     }
 }

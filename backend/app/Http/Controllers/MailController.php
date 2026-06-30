@@ -20,9 +20,9 @@ class MailController extends Controller
 
         $query = MailAccount::with('domain.hostingAccount');
 
-        if ($user->isClient()) {
-            $query->whereHas('domain.hostingAccount', fn($q) => $q->where('user_id', $user->id));
-        }
+        // Everyone only sees their own mail accounts
+        // Admin uses "Login as" to manage client emails
+        $query->whereHas('domain.hostingAccount', fn($q) => $q->where('user_id', $user->id));
 
         $mailAccounts = $query->paginate(20);
 
