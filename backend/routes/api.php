@@ -81,6 +81,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/hosting', [HostingController::class, 'index']);
     Route::middleware('role:super_admin,reseller')->group(function () {
         Route::post('/hosting', [HostingController::class, 'store']);
+        Route::patch('/hosting/{hostingAccount}', [HostingController::class, 'update']);
     });
 
     // ─── Domains ──────────────────────────────────────────────

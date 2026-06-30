@@ -57,4 +57,37 @@ class HostingController extends Controller
 
         return response()->json($account, 201);
     }
+
+    /**
+     * Update a hosting account (change plan, status, etc).
+     */
+    public function update(Request $request, HostingAccount $hostingAccount): JsonResponse
+    {
+        $request->validate([
+            'plan_id' => 'sometimes|exists:plans,id',
+            'status' => 'sometimes|in:active,suspended,pending,deleted',
+        ]);
+
+        if ($request->has('plan_id')) {
+            $newPlan = Plan::findOrFail($request->plan_id);
+            $hostingAccount->update([
+                'plan_id' => $newPlan->id,
+                'disk_limit_mb' => $newPlan->disk_quota_mb,
+            ]);
+        }
+
+        if ($request->has('status')) {
+            $hostingAccount->update(['status' => $request->status]);
+
+            // Sync with HestiaCP
+            $username = $hostingAccount->hestia_username;
+            if ($request->status === 'suspended') {
+                exec("/usr/local/hestia/bin/v-suspend-user {$username} 2>&1");
+            } elseif ($request->status === 'active') {
+                exec("/usr/local/hestia/bin/v-unsuspend-user {$username} 2>&1");
+            }
+        }
+
+        return response()->json($hostingAccount->fresh()->load(['user', 'plan']));
+    }
 }
