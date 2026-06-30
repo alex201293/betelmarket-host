@@ -20,6 +20,7 @@ export default function PlansPage() {
   const [form, setForm] = useState({
     name: "", max_domains: "1", max_subdomains: "5", max_mailboxes: "10",
     disk_quota_mb: "5120", bandwidth_quota_mb: "51200", max_databases: "1", price: "9.99",
+    mailbox_quota_mb: "1024",
   });
 
   const { data, isLoading } = useQuery<Plan[]>({
@@ -41,6 +42,7 @@ export default function PlansPage() {
         bandwidth_quota_mb: parseInt(form.bandwidth_quota_mb),
         max_databases: parseInt(form.max_databases),
         price: parseFloat(form.price),
+        mailbox_quota_mb: parseInt(form.mailbox_quota_mb),
       };
       await api.post("/plans", payload);
     },
@@ -65,6 +67,7 @@ export default function PlansPage() {
         bandwidth_quota_mb: parseInt(form.bandwidth_quota_mb),
         max_databases: parseInt(form.max_databases),
         price: parseFloat(form.price),
+        mailbox_quota_mb: parseInt(form.mailbox_quota_mb),
       });
     },
     onSuccess: () => {
@@ -87,6 +90,7 @@ export default function PlansPage() {
       bandwidth_quota_mb: String(plan.bandwidth_quota_mb),
       max_databases: String(plan.max_databases),
       price: String(plan.price),
+      mailbox_quota_mb: String((plan as any).mailbox_quota_mb || 1024),
     });
   };
 
@@ -140,6 +144,11 @@ export default function PlansPage() {
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">Max Databases</label>
                 <Input type="number" value={form.max_databases} onChange={(e) => setForm({ ...form, max_databases: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Mailbox Quota (MB)</label>
+                <Input type="number" value={form.mailbox_quota_mb} onChange={(e) => setForm({ ...form, mailbox_quota_mb: e.target.value })} />
+                <p className="text-[10px] text-gray-400 mt-0.5">500=500MB, 1024=1GB, 5120=5GB</p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">Price ($/mo)</label>
