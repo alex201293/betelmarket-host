@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Mail, Plus, Trash2, Key, Copy, ExternalLink, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
+import { PasswordInput } from "@/components/ui/password-input";
 import type { MailAccount } from "@/types";
 
 export default function MailPage() {
@@ -97,7 +98,7 @@ export default function MailPage() {
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
-                  <Input type="password" placeholder="Min 8 chars" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+                  <PasswordInput placeholder="Min 8 chars" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700">Quota (MB)</label>
@@ -118,7 +119,7 @@ export default function MailPage() {
         <Card><CardContent className="p-5">
           <h3 className="font-semibold text-gray-900 mb-3">Change password - {changePass.email}</h3>
           <div className="flex gap-2">
-            <Input type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="max-w-xs" />
+            <PasswordInput placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="max-w-xs" />
             <Button onClick={() => updatePassword.mutate()} disabled={!newPassword || newPassword.length < 8}>Change</Button>
             <Button variant="outline" onClick={() => { setChangePass(null); setNewPassword(""); }}>Cancel</Button>
           </div>

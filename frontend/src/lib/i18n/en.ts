@@ -241,7 +241,7 @@ export const en = {
   },
   auth: {
     signIn: "Sign in to BetelMarket",
-    signInSubtitle: "Enter your credentials to access the hosting panel.",
+    signInSubtitle: "Ingresa a tu cuenta de bpanel hosting web y correos.",
     emailLabel: "Email",
     passwordLabel: "Password",
     signInBtn: "Sign In",
