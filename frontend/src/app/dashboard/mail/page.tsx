@@ -80,7 +80,8 @@ export default function MailPage() {
 
   const emails: MailAccount[] = data?.data || [];
 
-  const serverHost = "mail.tuservidor.com"; // In production: from config/domain
+  const webmailDomain = domainsList.length > 0 ? domainsList[0].domain : "";
+  const webmailUrl = webmailDomain ? `http://webmail.${webmailDomain}` : "#";
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -98,7 +99,7 @@ export default function MailPage() {
           <p className="mt-1 text-sm text-gray-500">Manage mailboxes, passwords, and access webmail.</p>
         </div>
         <div className="flex gap-2">
-          <a href={`https://${serverHost}/webmail`} target="_blank" rel="noopener noreferrer">
+          <a href={`${webmailUrl}`} target="_blank" rel="noopener noreferrer">
             <Button variant="outline">
               <ExternalLink className="mr-2 h-4 w-4" /> Webmail (Roundcube)
             </Button>
@@ -120,7 +121,7 @@ export default function MailPage() {
               <div>
                 <h3 className="font-semibold text-gray-900">Webmail Access</h3>
                 <p className="mt-1 text-sm text-gray-600">Access email from any browser using Roundcube.</p>
-                <a href={`https://${serverHost}/webmail`} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
+                <a href={`${webmailUrl}`} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700">
                   Open Webmail <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
