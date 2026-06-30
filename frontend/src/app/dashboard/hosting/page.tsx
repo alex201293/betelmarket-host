@@ -18,6 +18,9 @@ interface HostingAccount {
   disk_used_mb: number;
   disk_limit_mb: number;
   real_disk_mb?: number;
+  extra_mailboxes?: number;
+  extra_domains?: number;
+  extra_disk_mb?: number;
   user?: { id: number; name: string; email: string };
   plan?: { id: number; name: string; price: string; disk_quota_mb: number };
 }
@@ -143,23 +146,62 @@ export default function HostingPage() {
       {/* Change Plan form */}
       {editAccount && (
         <Card>
-          <CardHeader><CardTitle>Change Plan — {editAccount.user?.name} ({editAccount.hestia_username})</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 mb-3">Current plan: <strong>{editAccount.plan?.name}</strong> (${editAccount.plan?.price}/mo)</p>
-            <div className="flex gap-3 items-end">
-              <div className="flex-1">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">New Plan</label>
-                <select className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm" value={upgradePlanId} onChange={(e) => setUpgradePlanId(e.target.value)} required>
-                  <option value="">Select new plan...</option>
-                  {plansList.filter((p: any) => p.id !== editAccount.plan?.id).map((p: any) => (
-                    <option key={p.id} value={p.id}>{p.name} — ${p.price}/mo ({formatBytes(p.disk_quota_mb)})</option>
-                  ))}
-                </select>
+          <CardHeader><CardTitle>Manage — {editAccount.user?.name} ({editAccount.hestia_username})</CardTitle></CardHeader>
+          <CardContent className="space-y-6">
+            {/* Change plan */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Change Plan</h4>
+              <p className="text-sm text-gray-600 mb-3">Current: <strong>{editAccount.plan?.name}</strong> (${editAccount.plan?.price}/mo)</p>
+              <div className="flex gap-3 items-end">
+                <div className="flex-1">
+                  <select className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm" value={upgradePlanId} onChange={(e) => setUpgradePlanId(e.target.value)}>
+                    <option value="">Select new plan...</option>
+                    {plansList.filter((p: any) => p.id !== editAccount.plan?.id).map((p: any) => (
+                      <option key={p.id} value={p.id}>{p.name} — ${p.price}/mo ({formatBytes(p.disk_quota_mb)})</option>
+                    ))}
+                  </select>
+                </div>
+                <Button onClick={() => changePlan.mutate()} disabled={!upgradePlanId || changePlan.isPending}>
+                  <ArrowUpCircle className="mr-1 h-4 w-4" /> {changePlan.isPending ? "Changing..." : "Change Plan"}
+                </Button>
               </div>
-              <Button onClick={() => changePlan.mutate()} disabled={!upgradePlanId || changePlan.isPending}>
-                <ArrowUpCircle className="mr-1 h-4 w-4" /> {changePlan.isPending ? "Changing..." : "Change Plan"}
+            </div>
+
+            {/* Extras */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Custom Extras (add without changing plan)</h4>
+              <p className="text-xs text-gray-500 mb-3">Add extra resources to this specific client beyond their plan limits.</p>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600">Extra Mailboxes</label>
+                  <Input type="number" placeholder="0" id="extra_mailboxes" defaultValue={editAccount.extra_mailboxes || 0} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600">Extra Domains</label>
+                  <Input type="number" placeholder="0" id="extra_domains" defaultValue={editAccount.extra_domains || 0} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600">Extra Disk (MB)</label>
+                  <Input type="number" placeholder="0" id="extra_disk_mb" defaultValue={editAccount.extra_disk_mb || 0} />
+                </div>
+              </div>
+              <Button className="mt-3" variant="outline" onClick={() => {
+                const extras = {
+                  extra_mailboxes: parseInt((document.getElementById("extra_mailboxes") as HTMLInputElement)?.value || "0"),
+                  extra_domains: parseInt((document.getElementById("extra_domains") as HTMLInputElement)?.value || "0"),
+                  extra_disk_mb: parseInt((document.getElementById("extra_disk_mb") as HTMLInputElement)?.value || "0"),
+                };
+                api.patch(`/hosting/${editAccount.id}`, extras).then(() => {
+                  queryClient.invalidateQueries({ queryKey: ["hosting"] });
+                  toast.success("Extras updated");
+                });
+              }}>
+                Save Extras
               </Button>
-              <Button variant="outline" onClick={() => setEditAccount(null)}>Cancel</Button>
+            </div>
+
+            <div className="border-t pt-3 flex justify-end">
+              <Button variant="outline" onClick={() => setEditAccount(null)}>Close</Button>
             </div>
           </CardContent>
         </Card>
