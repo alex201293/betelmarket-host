@@ -40,6 +40,15 @@ class DeployApp implements ShouldQueue
         if ($result['success']) {
             $log->update(['status' => 'completed', 'output' => 'App deployed successfully.']);
 
+            // Save deploy history
+            $history = $this->app->deploy_history ?? [];
+            array_unshift($history, [
+                'date' => now()->toISOString(),
+                'status' => 'success',
+                'message' => 'Deployed successfully',
+            ]);
+            $this->app->update(['deploy_history' => array_slice($history, 0, 20)]); // Keep last 20
+
             Notification::send(
                 $this->app->user_id,
                 'app_deployed',
@@ -50,6 +59,15 @@ class DeployApp implements ShouldQueue
         } else {
             $this->app->update(['status' => 'error', 'last_deploy_log' => $result['logs'] ?? $result['error'] ?? 'Unknown error']);
             $log->update(['status' => 'failed', 'output' => $result['logs'] ?? '']);
+
+            // Save deploy history
+            $history = $this->app->deploy_history ?? [];
+            array_unshift($history, [
+                'date' => now()->toISOString(),
+                'status' => 'failed',
+                'message' => $result['step'] ?? 'Unknown error',
+            ]);
+            $this->app->update(['deploy_history' => array_slice($history, 0, 20)]);
 
             Notification::send(
                 $this->app->user_id,

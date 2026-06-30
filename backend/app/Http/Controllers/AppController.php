@@ -67,6 +67,8 @@ class AppController extends Controller
             'install_command' => $request->install_command,
             'env_vars' => $request->get('env_vars', ['PORT' => (string) $port]),
             'status' => 'pending',
+            'deploy_secret' => \Illuminate\Support\Str::random(32),
+            'auto_deploy' => (bool) $request->get('auto_deploy', false),
         ]);
 
         // Auto-deploy if git repo is provided
@@ -74,7 +76,10 @@ class AppController extends Controller
             DeployApp::dispatch($app);
         }
 
-        return response()->json($app, 201);
+        return response()->json([
+            'app' => $app,
+            'webhook_url' => $app->git_repo ? url("/api/webhooks/deploy/{$app->id}/{$app->deploy_secret}") : null,
+        ], 201);
     }
 
     /**

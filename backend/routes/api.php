@@ -27,6 +27,7 @@ use App\Http\Controllers\TempDomainController;
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\PhpConfigController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,6 +43,9 @@ Route::get('/health', fn () => ['ok' => true, 'timestamp' => now()]);
 |--------------------------------------------------------------------------
 */
 Route::get('/plans/public', [PlanController::class, 'index']);
+
+// Webhooks (no auth required)
+Route::post('/webhooks/deploy/{appId}/{secret}', [WebhookController::class, 'deploy']);
 
 /*
 |--------------------------------------------------------------------------

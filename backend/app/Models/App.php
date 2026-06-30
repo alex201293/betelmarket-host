@@ -27,13 +27,18 @@ class App extends Model
         'status',
         'last_deploy_log',
         'last_deployed_at',
+        'deploy_secret',
+        'auto_deploy',
+        'deploy_history',
     ];
 
     protected function casts(): array
     {
         return [
             'env_vars' => 'array',
+            'deploy_history' => 'array',
             'last_deployed_at' => 'datetime',
+            'auto_deploy' => 'boolean',
         ];
     }
 
