@@ -46,6 +46,16 @@ export default function MigrationsPage() {
     },
   });
 
+  const { data: domainsData } = useQuery({
+    queryKey: ["domains-for-migration"],
+    queryFn: async () => {
+      const { data } = await api.get("/domains");
+      return data;
+    },
+  });
+
+  const domainsList = (domainsData?.data || []).filter((d: any) => d.status === "active" && !d.is_temporary);
+
   const createMigration = useMutation({
     mutationFn: async () => {
       const { data } = await api.post("/migrations", {
@@ -172,13 +182,17 @@ export default function MigrationsPage() {
                     <Mail className="h-4 w-4 text-brand-600" />
                     Destination (this server)
                   </div>
-                  <Input
-                    placeholder="Domain ID"
-                    type="number"
+                  <select
+                    className="flex h-9 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm"
                     value={form.domain_id}
                     onChange={(e) => setForm({ ...form, domain_id: e.target.value })}
                     required
-                  />
+                  >
+                    <option value="">Select domain...</option>
+                    {domainsList.map((d: any) => (
+                      <option key={d.id} value={d.id}>{d.domain}</option>
+                    ))}
+                  </select>
                   <Input
                     placeholder="Destination email (e.g., info@tudominio.com)"
                     type="email"
