@@ -171,10 +171,15 @@ export default function HostingPage() {
             <div className="border-t pt-4">
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Custom Extras (add without changing plan)</h4>
               <p className="text-xs text-gray-500 mb-3">Add extra resources to this specific client beyond their plan limits.</p>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-4">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-600">Extra Mailboxes</label>
                   <Input type="number" placeholder="0" id="extra_mailboxes" defaultValue={editAccount.extra_mailboxes || 0} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600">Mailbox Quota (MB each)</label>
+                  <Input type="number" placeholder="500" id="real_mailbox_quota_mb" defaultValue={(editAccount as any).real_mailbox_quota_mb || 500} />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Size per mailbox (ej: 500 = 500MB, 5000 = 5GB)</p>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-600">Extra Domains</label>
@@ -190,6 +195,7 @@ export default function HostingPage() {
                   extra_mailboxes: parseInt((document.getElementById("extra_mailboxes") as HTMLInputElement)?.value || "0"),
                   extra_domains: parseInt((document.getElementById("extra_domains") as HTMLInputElement)?.value || "0"),
                   extra_disk_mb: parseInt((document.getElementById("extra_disk_mb") as HTMLInputElement)?.value || "0"),
+                  real_mailbox_quota_mb: parseInt((document.getElementById("real_mailbox_quota_mb") as HTMLInputElement)?.value || "500"),
                 };
                 api.patch(`/hosting/${editAccount.id}`, extras).then(() => {
                   queryClient.invalidateQueries({ queryKey: ["hosting"] });
