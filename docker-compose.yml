@@ -101,6 +101,7 @@ services:
       - backend
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000/api
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: 6LdNCz8tAAAAAPjTYvO4b_bfV0lIANR4006xmGsX
     volumes:
       - ./frontend:/app
       - /app/node_modules

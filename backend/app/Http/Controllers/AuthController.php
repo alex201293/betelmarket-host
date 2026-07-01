@@ -7,10 +7,31 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Verify reCAPTCHA token if secret key is configured.
+     */
+    private function verifyCaptcha(Request $request): bool
+    {
+        $secret = env('RECAPTCHA_SECRET_KEY');
+        if (!$secret) return true; // Skip if not configured
+
+        $token = $request->input('captcha_token');
+        if (!$token) return false;
+
+        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => $secret,
+            'response' => $token,
+            'remoteip' => $request->ip(),
+        ]);
+
+        return $response->json('success', false);
+    }
+
     /**
      * Login and return a token.
      */
@@ -20,6 +41,10 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
+
+        if (!$this->verifyCaptcha($request)) {
+            return response()->json(['message' => 'Verificación de captcha fallida.'], 422);
+        }
 
         $user = User::where('email', $request->email)->first();
 
@@ -73,6 +98,10 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        if (!$this->verifyCaptcha($request)) {
+            return response()->json(['message' => 'Verificación de captcha fallida.'], 422);
+        }
 
         $user = User::create([
             'name' => $request->name,

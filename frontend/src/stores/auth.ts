@@ -15,8 +15,8 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, captchaToken?: string) => Promise<void>;
+  register: (name: string, email: string, password: string, captchaToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   setToken: (token: string) => void;
@@ -27,10 +27,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
   isLoading: false,
 
-  login: async (email: string, password: string) => {
+  login: async (email: string, password: string, captchaToken?: string) => {
     set({ isLoading: true });
     try {
-      const { data } = await api.post("/auth/login", { email, password });
+      const { data } = await api.post("/auth/login", { email, password, captcha_token: captchaToken });
       localStorage.setItem("token", data.token);
       set({ token: data.token, user: data.user, isLoading: false });
     } catch (error) {
@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  register: async (name: string, email: string, password: string) => {
+  register: async (name: string, email: string, password: string, captchaToken?: string) => {
     set({ isLoading: true });
     try {
       const { data } = await api.post("/auth/register", {
@@ -47,6 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         email,
         password,
         password_confirmation: password,
+        captcha_token: captchaToken,
       });
       localStorage.setItem("token", data.token);
       set({ token: data.token, user: data.user, isLoading: false });

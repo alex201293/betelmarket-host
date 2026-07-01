@@ -38,7 +38,7 @@ export default function LoginPage() {
       return;
     }
     try {
-      await login(email, password);
+      await login(email, password, captchaToken);
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Credenciales incorrectas");

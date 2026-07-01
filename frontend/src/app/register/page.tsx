@@ -39,7 +39,7 @@ export default function RegisterPage() {
       return;
     }
     try {
-      await register(name, email, password);
+      await register(name, email, password, captchaToken);
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Error al registrar");
