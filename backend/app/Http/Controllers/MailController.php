@@ -25,9 +25,9 @@ class MailController extends Controller
         $query->whereHas('domain.hostingAccount', fn($q) => $q->where('user_id', $user->id));
         $query->where('status', '!=', 'deleted');
 
-        $mailAccounts = $query->paginate(20);
+        $mailAccounts = $query->get();
 
-        return response()->json($mailAccounts);
+        return response()->json(['data' => $mailAccounts]);
     }
 
     /**
