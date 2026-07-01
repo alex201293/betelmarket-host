@@ -14,6 +14,7 @@ class MailAccount extends Model
         'domain_id',
         'email',
         'quota_mb',
+        'max_quota_mb',
         'usage_mb',
         'status',
         'password_hash',
@@ -35,5 +36,31 @@ class MailAccount extends Model
         }
 
         return round(($this->usage_mb / $this->quota_mb) * 100, 2);
+    }
+
+    /**
+     * Check if this mailbox needs quota scaling (at 80%+).
+     */
+    public function needsQuotaScale(): bool
+    {
+        return $this->getUsagePercentage() >= 80;
+    }
+
+    /**
+     * Scale up mailbox quota by 1GB if plan allows.
+     * Returns true if scaled, false if at max.
+     */
+    public function scaleUpQuota(): bool
+    {
+        $maxAllowed = $this->max_quota_mb ?? 5120;
+        $increment = 1024; // 1GB
+        $newQuota = $this->quota_mb + $increment;
+
+        if ($newQuota > $maxAllowed) {
+            return false;
+        }
+
+        $this->update(['quota_mb' => $newQuota]);
+        return true;
     }
 }

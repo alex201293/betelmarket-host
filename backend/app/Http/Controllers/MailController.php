@@ -57,15 +57,17 @@ class MailController extends Controller
             return response()->json(['message' => "Mailbox limit reached ({$currentMailboxes}/{$maxMailboxes}). Upgrade your plan or request more."], 422);
         }
 
-        // Get mailbox quota: extras override > plan default
-        $quotaMb = $account->real_mailbox_quota_mb ?? $account->plan->mailbox_quota_mb ?? 1024;
+        // Get mailbox quota: start with 1GB initial, max allowed is plan limit
+        $maxQuotaMb = $account->real_mailbox_quota_mb ?? $account->plan->mailbox_quota_mb ?? 5120;
+        $initialQuotaMb = min(1024, $maxQuotaMb); // Start at 1GB (or less if plan max is lower)
 
         $email = $request->account . '@' . $domain->domain;
 
         $mailAccount = MailAccount::create([
             'domain_id' => $domain->id,
             'email' => $email,
-            'quota_mb' => $quotaMb,
+            'quota_mb' => $initialQuotaMb,
+            'max_quota_mb' => $maxQuotaMb,
             'status' => 'active',
             'password_hash' => Hash::make($request->password),
         ]);

@@ -48,7 +48,15 @@ class ProvisionMailbox implements ShouldQueue
         );
 
         if ($result['success']) {
-            $log->update(['status' => 'completed', 'output' => 'Mailbox provisioned.']);
+            // Apply quota in HestiaCP
+            $mailManager->changeMailboxQuota(
+                $username,
+                $domain->domain,
+                $account,
+                $this->mailAccount->quota_mb
+            );
+
+            $log->update(['status' => 'completed', 'output' => 'Mailbox provisioned with quota ' . $this->mailAccount->quota_mb . 'MB.']);
         } else {
             $this->mailAccount->update(['status' => 'suspended']);
             $log->update(['status' => 'failed', 'output' => $result['response'] ?? 'Unknown error']);

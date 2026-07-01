@@ -48,6 +48,7 @@ export interface MailAccount {
   domain_id: number;
   email: string;
   quota_mb: number;
+  max_quota_mb: number;
   usage_mb: number;
   status: "active" | "suspended" | "deleted";
   domain?: Domain;
