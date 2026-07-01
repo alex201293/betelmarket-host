@@ -24,12 +24,25 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
-  const [captchaReady, setCaptchaReady] = useState(false);
   const { login, isLoading } = useAuthStore();
   const router = useRouter();
   const captchaRef = useRef<HTMLDivElement>(null);
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+
+  const renderCaptcha = () => {
+    if (captchaRef.current && !captchaRef.current.hasChildNodes() && window.grecaptcha?.render) {
+      try {
+        window.grecaptcha.render(captchaRef.current, {
+          sitekey: siteKey,
+          callback: (token: string) => setCaptchaToken(token),
+          "expired-callback": () => setCaptchaToken(""),
+        });
+      } catch (e) {
+        // Already rendered, ignore
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,19 +70,8 @@ export default function LoginPage() {
           src={`https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit`}
           strategy="afterInteractive"
           onReady={() => {
-            window.onRecaptchaLoad = () => {
-              if (captchaRef.current && !captchaReady) {
-                window.grecaptcha.render(captchaRef.current, {
-                  sitekey: siteKey,
-                  callback: (token: string) => setCaptchaToken(token),
-                  "expired-callback": () => setCaptchaToken(""),
-                });
-                setCaptchaReady(true);
-              }
-            };
-            if (window.grecaptcha && window.grecaptcha.render) {
-              window.onRecaptchaLoad();
-            }
+            window.onRecaptchaLoad = () => renderCaptcha();
+            if (window.grecaptcha?.render) renderCaptcha();
           }}
         />
       )}
