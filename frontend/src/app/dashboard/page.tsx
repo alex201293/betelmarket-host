@@ -63,26 +63,40 @@ export default function DashboardPage() {
         <p className="mt-1 text-gray-500">{t.dashboard.subtitle}</p>
       </div>
 
-      {/* Alert Banner (example) */}
-      <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50 px-5 py-3">
-        <div className="flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-red-500" />
-          <div>
+      {/* Alert Banner */}
+      {diskPercentage >= 80 ? (
+        <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50 px-5 py-3">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-red-500" />
             <p className="text-sm font-medium text-red-800">
-              {diskPercentage >= 80
-                ? `Disk usage is at ${diskPercentage}% — consider upgrading your plan.`
-                : "All systems operational. No pending alerts."}
+              El uso de disco está al {diskPercentage}% — considera actualizar tu plan.
             </p>
           </div>
-        </div>
-        {diskPercentage >= 80 && (
           <Link href="/dashboard/plans">
             <button className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-red-700">
               Upgrade
             </button>
           </Link>
-        )}
-      </div>
+        </div>
+      ) : diskPercentage >= 60 ? (
+        <div className="flex items-center justify-between rounded-xl border border-yellow-100 bg-yellow-50 px-5 py-3">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-yellow-500" />
+            <p className="text-sm font-medium text-yellow-800">
+              Uso de disco al {diskPercentage}%. Mantén un ojo en tu almacenamiento.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center rounded-xl border border-green-100 bg-green-50 px-5 py-3">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-500" />
+            <p className="text-sm font-medium text-green-800">
+              Todos los sistemas operativos. Sin alertas pendientes.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
