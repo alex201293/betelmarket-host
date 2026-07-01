@@ -43,10 +43,13 @@ class UsageController extends Controller
 
     private function userUsage($user): JsonResponse
     {
-        $accounts = $user->hostingAccounts;
+        $accounts = $user->hostingAccounts()->with('plan')->get();
 
         $diskUsed = $accounts->sum('disk_used_mb');
-        $diskLimit = $accounts->sum('disk_limit_mb');
+        // Use plan disk quota (what the client purchased), not Hestia's internal limit
+        $diskLimit = $accounts->sum(function ($account) {
+            return $account->plan->disk_quota_mb ?? $account->disk_limit_mb;
+        });
         $domains = Domain::whereIn('hosting_account_id', $accounts->pluck('id'))
             ->where('status', '!=', 'deleted')
             ->count();
