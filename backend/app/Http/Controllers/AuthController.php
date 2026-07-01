@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -23,13 +22,19 @@ class AuthController extends Controller
         $token = $request->input('captcha_token');
         if (!$token) return false;
 
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+        $ch = curl_init('https://www.google.com/recaptcha/api/siteverify');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
             'secret' => $secret,
             'response' => $token,
             'remoteip' => $request->ip(),
-        ]);
+        ]));
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-        return $response->json('success', false);
+        $result = json_decode($response, true);
+        return $result['success'] ?? false;
     }
 
     /**
