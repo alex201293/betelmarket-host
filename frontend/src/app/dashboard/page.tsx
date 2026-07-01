@@ -72,11 +72,11 @@ export default function DashboardPage() {
               El uso de disco está al {diskPercentage}% — considera actualizar tu plan.
             </p>
           </div>
-          <Link href="/dashboard/plans">
+          <a href="https://betelmarket.com/" target="_blank" rel="noopener noreferrer">
             <button className="rounded-lg bg-red-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-red-700">
               Upgrade
             </button>
-          </Link>
+          </a>
         </div>
       ) : diskPercentage >= 60 ? (
         <div className="flex items-center justify-between rounded-xl border border-yellow-100 bg-yellow-50 px-5 py-3">
