@@ -23,7 +23,7 @@ export function Tabs({ tabs, activeTab, onTabChange, children, className }: Tabs
   const setActive = onTabChange ?? setInternalActive;
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full text-gray-900", className)}>
       <div className="flex border-b border-gray-200 overflow-x-auto">
         {tabs.map((tab) => (
           <button
