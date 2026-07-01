@@ -76,7 +76,7 @@ export default function SiteDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Panel</h1>
-        <Link href="/dashboard/plans"><Button variant="outline">Mejorar plan</Button></Link>
+        <a href="https://betelmarket.com/" target="_blank" rel="noopener noreferrer"><Button variant="outline">Mejorar plan</Button></a>
       </div>
 
       {/* Site card */}
@@ -165,7 +165,7 @@ export default function SiteDetailPage() {
             <div className="border-t border-gray-100 px-5 py-3">
               <div className="flex items-center justify-between">
                 <div><p className="text-sm font-medium text-gray-900">Plan de hosting</p><p className="text-xs text-gray-500">{planName}</p></div>
-                <Link href="/dashboard/plans"><span className="text-sm text-brand-600">›</span></Link>
+                <a href="https://betelmarket.com/" target="_blank" rel="noopener noreferrer"><span className="text-sm text-brand-600">›</span></a>
               </div>
             </div>
           </CardContent>
