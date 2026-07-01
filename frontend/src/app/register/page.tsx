@@ -77,7 +77,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <img
-            src="/images/logo-betelmarket.png"
+            src="/images/logo-login-register.png"
             alt="BetelMarket"
             className="mx-auto h-16 w-auto"
           />
