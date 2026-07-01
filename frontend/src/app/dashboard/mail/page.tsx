@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Tabs, TabPanel } from "@/components/ui/tabs";
+import { Dialog, DialogHeader, DialogContent } from "@/components/ui/dialog";
 import type { MailAccount } from "@/types";
 
 export default function MailPage() {
@@ -157,39 +158,159 @@ export default function MailPage() {
         </CardContent></Card>
       )}
 
-      {/* Config panel */}
-      {showConfig && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Mail Configuration - {showConfig}</CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setShowConfig(null)}>Close</Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border p-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Incoming (IMAP)</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Server:</span><code className="bg-gray-100 px-2 rounded text-xs">mail.{getDomain(showConfig)}</code></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Port:</span><code className="bg-gray-100 px-2 rounded text-xs">993</code></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Security:</span><code className="bg-gray-100 px-2 rounded text-xs">SSL/TLS</code></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Username:</span><code className="bg-gray-100 px-2 rounded text-xs">{showConfig}</code></div>
-                </div>
-              </div>
-              <div className="rounded-lg border p-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Outgoing (SMTP)</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Server:</span><code className="bg-gray-100 px-2 rounded text-xs">mail.{getDomain(showConfig)}</code></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Port:</span><code className="bg-gray-100 px-2 rounded text-xs">465</code></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Security:</span><code className="bg-gray-100 px-2 rounded text-xs">SSL/TLS</code></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Username:</span><code className="bg-gray-100 px-2 rounded text-xs">{showConfig}</code></div>
-                </div>
+      {/* Config Dialog/Popup */}
+      <Dialog open={!!showConfig} onClose={() => setShowConfig(null)} className="max-w-3xl">
+        <DialogHeader>
+          <h2 className="text-lg font-bold text-gray-900">Configuración - {showConfig}</h2>
+          <p className="text-sm text-gray-500 mt-1">Datos de conexión y guías para configurar tu correo.</p>
+        </DialogHeader>
+        <DialogContent>
+          {/* IMAP/SMTP quick info */}
+          <div className="grid gap-4 sm:grid-cols-2 mb-6">
+            <div className="rounded-lg border p-4">
+              <h4 className="font-semibold text-gray-900 mb-3">Entrante (IMAP)</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-gray-500">Servidor:</span><code className="bg-gray-100 px-2 rounded text-xs">mail.{getDomain(showConfig || "")}</code></div>
+                <div className="flex justify-between"><span className="text-gray-500">Puerto:</span><code className="bg-gray-100 px-2 rounded text-xs">993</code></div>
+                <div className="flex justify-between"><span className="text-gray-500">Seguridad:</span><code className="bg-gray-100 px-2 rounded text-xs">SSL/TLS</code></div>
+                <div className="flex justify-between"><span className="text-gray-500">Usuario:</span><code className="bg-gray-100 px-2 rounded text-xs">{showConfig}</code></div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="rounded-lg border p-4">
+              <h4 className="font-semibold text-gray-900 mb-3">Saliente (SMTP)</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-gray-500">Servidor:</span><code className="bg-gray-100 px-2 rounded text-xs">mail.{getDomain(showConfig || "")}</code></div>
+                <div className="flex justify-between"><span className="text-gray-500">Puerto:</span><code className="bg-gray-100 px-2 rounded text-xs">465</code></div>
+                <div className="flex justify-between"><span className="text-gray-500">Seguridad:</span><code className="bg-gray-100 px-2 rounded text-xs">SSL/TLS</code></div>
+                <div className="flex justify-between"><span className="text-gray-500">Usuario:</span><code className="bg-gray-100 px-2 rounded text-xs">{showConfig}</code></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Connect Apps & Devices with Tabs */}
+          <div className="border-t pt-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Smartphone className="h-5 w-5 text-brand-600" />
+              <h3 className="font-semibold text-gray-900">Conecta apps y dispositivos</h3>
+            </div>
+            <Tabs
+              tabs={[
+                { id: "gmail", label: "Gmail" },
+                { id: "outlook", label: "Outlook" },
+                { id: "apple", label: "Apple Mail" },
+                { id: "thunderbird", label: "Thunderbird" },
+                { id: "other", label: "Otro" },
+              ]}
+              activeTab={connectTab}
+              onTabChange={setConnectTab}
+            >
+              <TabPanel id="gmail" activeTab={connectTab}>
+                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Gmail (Android / Web)</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                    <li>Abre Gmail → <strong>Configuración</strong> → <strong>Añadir cuenta</strong>.</li>
+                    <li>Selecciona <strong>"Otra"</strong> (IMAP).</li>
+                    <li>Ingresa: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">{showConfig}</code></li>
+                    <li>IMAP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code> Puerto <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> SSL/TLS</li>
+                    <li>SMTP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code> Puerto <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> SSL/TLS</li>
+                    <li>Usuario: tu correo completo. Contraseña: la del buzón.</li>
+                  </ol>
+                </div>
+              </TabPanel>
+              <TabPanel id="outlook" activeTab={connectTab}>
+                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Outlook (Windows / Mac)</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                    <li>Outlook → <strong>Archivo</strong> → <strong>Agregar cuenta</strong> → Config. avanzada → <strong>IMAP</strong>.</li>
+                    <li>Entrante: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code> Puerto <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> SSL/TLS</li>
+                    <li>Saliente: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code> Puerto <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> SSL/TLS</li>
+                    <li>Usuario: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">{showConfig}</code></li>
+                    <li>Haz clic en <strong>Conectar</strong>.</li>
+                  </ol>
+                </div>
+              </TabPanel>
+              <TabPanel id="apple" activeTab={connectTab}>
+                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Apple Mail (iPhone / Mac)</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                    <li><strong>Ajustes</strong> → <strong>Correo</strong> → <strong>Cuentas</strong> → <strong>Añadir cuenta</strong> → <strong>Otra</strong>.</li>
+                    <li>Completa nombre, correo, contraseña. Selecciona <strong>IMAP</strong>.</li>
+                    <li>Entrante: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code></li>
+                    <li>Saliente: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code></li>
+                    <li>Puerto IMAP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> SSL. Puerto SMTP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> SSL.</li>
+                  </ol>
+                </div>
+              </TabPanel>
+              <TabPanel id="thunderbird" activeTab={connectTab}>
+                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Mozilla Thunderbird</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+                    <li>Thunderbird → <strong>Añadir cuenta de correo</strong> → Ingresa nombre, correo y contraseña.</li>
+                    <li>Haz clic en <strong>Configuración manual</strong>.</li>
+                    <li>IMAP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code> Puerto <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> SSL/TLS</li>
+                    <li>SMTP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.{getDomain(showConfig || "")}</code> Puerto <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> SSL/TLS</li>
+                    <li>Autenticación: <strong>Contraseña normal</strong>. Clic en <strong>Listo</strong>.</li>
+                  </ol>
+                </div>
+              </TabPanel>
+              <TabPanel id="other" activeTab={connectTab}>
+                <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Configuración manual</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                    <li><strong>Email:</strong> {showConfig}</li>
+                    <li><strong>Servidor IMAP:</strong> mail.{getDomain(showConfig || "")} — Puerto 993 (SSL/TLS)</li>
+                    <li><strong>Servidor SMTP:</strong> mail.{getDomain(showConfig || "")} — Puerto 465 (SSL/TLS)</li>
+                    <li><strong>Autenticación:</strong> Contraseña normal</li>
+                  </ul>
+                </div>
+              </TabPanel>
+            </Tabs>
+          </div>
+
+          {/* Server Settings Table */}
+          <div className="border-t pt-5 mt-5">
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <Monitor className="h-4 w-4 text-gray-500" />
+              Ajustes del servidor
+            </h4>
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium text-gray-600">Protocolo</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-600">Host</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-600">Puerto</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-600">SSL/TLS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr>
+                    <td className="px-4 py-3 font-medium text-gray-900">IMAP</td>
+                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">mail.{getDomain(showConfig || "")}</code></td>
+                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">993</code></td>
+                    <td className="px-4 py-3"><Badge variant="success">SSL/TLS</Badge></td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium text-gray-900">POP3</td>
+                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">mail.{getDomain(showConfig || "")}</code></td>
+                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">995</code></td>
+                    <td className="px-4 py-3"><Badge variant="success">SSL/TLS</Badge></td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-medium text-gray-900">SMTP</td>
+                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">mail.{getDomain(showConfig || "")}</code></td>
+                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">465</code></td>
+                    <td className="px-4 py-3"><Badge variant="success">SSL/TLS</Badge></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs text-gray-500">
+              * El nombre de usuario siempre es tu dirección de correo completa.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Email list - Hostinger style */}
       <Card>
@@ -239,165 +360,6 @@ export default function MailPage() {
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* Connect Apps & Devices - Hostinger style */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5 text-brand-600" />
-            <CardTitle>Conecta apps y dispositivos</CardTitle>
-          </div>
-          <p className="text-sm text-gray-500 mt-1">
-            Configura tu correo en tu app favorita usando estos datos.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            tabs={[
-              { id: "gmail", label: "Gmail" },
-              { id: "outlook", label: "Outlook" },
-              { id: "apple", label: "Apple Mail" },
-              { id: "thunderbird", label: "Thunderbird" },
-              { id: "other", label: "Otro" },
-            ]}
-            activeTab={connectTab}
-            onTabChange={setConnectTab}
-          >
-            <TabPanel id="gmail" activeTab={connectTab}>
-              <div className="space-y-4">
-                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Gmail (Android / Web)</h4>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                    <li>Abre Gmail y ve a <strong>Configuración</strong> → <strong>Añadir cuenta</strong>.</li>
-                    <li>Selecciona <strong>"Otra"</strong> (IMAP).</li>
-                    <li>Ingresa tu dirección de correo completa (ej: info@tudominio.com).</li>
-                    <li>Selecciona <strong>IMAP</strong> como tipo de cuenta.</li>
-                    <li>Servidor de entrada: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code> — Puerto: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> — Seguridad: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">SSL/TLS</code></li>
-                    <li>Servidor de salida: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code> — Puerto: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> — Seguridad: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">SSL/TLS</code></li>
-                    <li>Usa tu correo completo como usuario y tu contraseña.</li>
-                  </ol>
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel id="outlook" activeTab={connectTab}>
-              <div className="space-y-4">
-                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Outlook (Windows / Mac)</h4>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                    <li>Abre Outlook y ve a <strong>Archivo</strong> → <strong>Agregar cuenta</strong>.</li>
-                    <li>Ingresa tu dirección de correo y selecciona <strong>Configuración avanzada</strong>.</li>
-                    <li>Elige <strong>IMAP</strong>.</li>
-                    <li>Servidor entrante: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code> — Puerto: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> — Cifrado: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">SSL/TLS</code></li>
-                    <li>Servidor saliente: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code> — Puerto: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> — Cifrado: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">SSL/TLS</code></li>
-                    <li>Ingresa tu correo completo como nombre de usuario y tu contraseña.</li>
-                    <li>Haz clic en <strong>Conectar</strong>.</li>
-                  </ol>
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel id="apple" activeTab={connectTab}>
-              <div className="space-y-4">
-                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Apple Mail (iPhone / Mac)</h4>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                    <li>Ve a <strong>Ajustes</strong> → <strong>Correo</strong> → <strong>Cuentas</strong> → <strong>Añadir cuenta</strong>.</li>
-                    <li>Selecciona <strong>"Otra"</strong> → <strong>Añadir cuenta de Mail</strong>.</li>
-                    <li>Completa nombre, correo, contraseña y descripción.</li>
-                    <li>Selecciona <strong>IMAP</strong>.</li>
-                    <li>Servidor correo entrante: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code></li>
-                    <li>Servidor correo saliente: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code></li>
-                    <li>Puerto IMAP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> con SSL activado.</li>
-                    <li>Puerto SMTP: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> con SSL activado.</li>
-                    <li>Guarda la configuración.</li>
-                  </ol>
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel id="thunderbird" activeTab={connectTab}>
-              <div className="space-y-4">
-                <div className="rounded-lg bg-blue-50 border border-blue-100 p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Pasos para Mozilla Thunderbird</h4>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                    <li>Abre Thunderbird y ve a <strong>Configuración de cuenta</strong> → <strong>Añadir cuenta de correo</strong>.</li>
-                    <li>Ingresa tu nombre, correo completo y contraseña.</li>
-                    <li>Haz clic en <strong>Configuración manual</strong>.</li>
-                    <li>Protocolo entrante: <strong>IMAP</strong> — Servidor: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code> — Puerto: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">993</code> — SSL: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">SSL/TLS</code></li>
-                    <li>Protocolo saliente: <strong>SMTP</strong> — Servidor: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">mail.tudominio.com</code> — Puerto: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">465</code> — SSL: <code className="bg-white px-1.5 py-0.5 rounded border text-xs font-mono">SSL/TLS</code></li>
-                    <li>Autenticación: <strong>Contraseña normal</strong>.</li>
-                    <li>Haz clic en <strong>Listo</strong>.</li>
-                  </ol>
-                </div>
-              </div>
-            </TabPanel>
-
-            <TabPanel id="other" activeTab={connectTab}>
-              <div className="space-y-4">
-                <div className="rounded-lg bg-gray-50 border border-gray-200 p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Configuración manual para cualquier cliente</h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Usa estos datos para configurar tu correo en cualquier aplicación que soporte IMAP/SMTP:
-                  </p>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
-                    <li><strong>Email:</strong> tu dirección completa (ej: info@tudominio.com)</li>
-                    <li><strong>Contraseña:</strong> la que estableciste al crear el buzón</li>
-                    <li><strong>Servidor entrante (IMAP):</strong> mail.tudominio.com</li>
-                    <li><strong>Puerto IMAP:</strong> 993 (SSL/TLS)</li>
-                    <li><strong>Servidor saliente (SMTP):</strong> mail.tudominio.com</li>
-                    <li><strong>Puerto SMTP:</strong> 465 (SSL/TLS)</li>
-                    <li><strong>Autenticación:</strong> Contraseña normal</li>
-                  </ul>
-                </div>
-              </div>
-            </TabPanel>
-          </Tabs>
-
-          {/* Server Settings Table */}
-          <div className="mt-6">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Monitor className="h-4 w-4 text-gray-500" />
-              Ajustes del servidor
-            </h4>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Protocolo</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Host</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">Puerto</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-600">SSL/TLS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-gray-900">IMAP</td>
-                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">mail.tudominio.com</code></td>
-                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">993</code></td>
-                    <td className="px-4 py-3"><Badge variant="success">SSL/TLS</Badge></td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-gray-900">POP3</td>
-                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">mail.tudominio.com</code></td>
-                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">995</code></td>
-                    <td className="px-4 py-3"><Badge variant="success">SSL/TLS</Badge></td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-medium text-gray-900">SMTP</td>
-                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">mail.tudominio.com</code></td>
-                    <td className="px-4 py-3"><code className="bg-gray-100 px-2 py-0.5 rounded text-xs font-mono">465</code></td>
-                    <td className="px-4 py-3"><Badge variant="success">SSL/TLS</Badge></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-3 text-xs text-gray-500">
-              * Reemplaza <strong>tudominio.com</strong> con tu dominio real. El nombre de usuario siempre es tu dirección de correo completa.
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
