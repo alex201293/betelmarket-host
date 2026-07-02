@@ -101,38 +101,44 @@ class WordPressManager
     {
         $docRoot = "/home/{$username}/web/{$domain}/public_html";
 
-        // Check if WordPress is installed
-        $checkCmd = "wp --allow-root core is-installed --path={$docRoot} 2>&1";
-        exec($checkCmd, $checkOutput, $checkCode);
-
-        if ($checkCode !== 0) {
+        // Check if WordPress is installed by looking for wp-config.php
+        if (!file_exists("{$docRoot}/wp-config.php")) {
             return ['installed' => false];
         }
 
-        // Get WP version
-        $versionCmd = "wp --allow-root core version --path={$docRoot} 2>&1";
-        exec($versionCmd, $versionOutput, $versionCode);
-        $version = trim($versionOutput[0] ?? '');
+        // Get WP version from wp-includes/version.php (no DB needed)
+        $version = '';
+        $versionFile = "{$docRoot}/wp-includes/version.php";
+        if (file_exists($versionFile)) {
+            $content = file_get_contents($versionFile);
+            if (preg_match("/\\\$wp_version\s*=\s*'([^']+)'/", $content, $matches)) {
+                $version = $matches[1];
+            }
+        }
 
-        // Get site URL
-        $urlCmd = "wp --allow-root option get siteurl --path={$docRoot} 2>&1";
-        exec($urlCmd, $urlOutput, $urlCode);
-        $siteUrl = trim($urlOutput[0] ?? '');
+        // Try to get more info via WP-CLI (may fail if DB not accessible from container)
+        $siteUrl = "https://{$domain}";
+        $plugins = [];
+        $themes = [];
+        $updates = [];
 
-        // Get plugins list
-        $pluginsCmd = "wp --allow-root plugin list --format=json --path={$docRoot} 2>&1";
-        exec($pluginsCmd, $pluginsOutput, $pluginsCode);
-        $plugins = json_decode(implode('', $pluginsOutput), true) ?: [];
+        $checkCmd = "wp --allow-root core is-installed --path={$docRoot} --skip-plugins --skip-themes 2>&1";
+        exec($checkCmd, $checkOutput, $checkCode);
 
-        // Get themes
-        $themesCmd = "wp --allow-root theme list --format=json --path={$docRoot} 2>&1";
-        exec($themesCmd, $themesOutput, $themesCode);
-        $themes = json_decode(implode('', $themesOutput), true) ?: [];
+        if ($checkCode === 0) {
+            // DB accessible, get full info
+            exec("wp --allow-root option get siteurl --path={$docRoot} 2>&1", $urlOutput);
+            $siteUrl = trim($urlOutput[0] ?? $siteUrl);
 
-        // Check updates
-        $updatesCmd = "wp --allow-root core check-update --format=json --path={$docRoot} 2>&1";
-        exec($updatesCmd, $updatesOutput, $updatesCode);
-        $updates = json_decode(implode('', $updatesOutput), true) ?: [];
+            exec("wp --allow-root plugin list --format=json --path={$docRoot} 2>&1", $pluginsOutput);
+            $plugins = json_decode(implode('', $pluginsOutput), true) ?: [];
+
+            exec("wp --allow-root theme list --format=json --path={$docRoot} 2>&1", $themesOutput);
+            $themes = json_decode(implode('', $themesOutput), true) ?: [];
+
+            exec("wp --allow-root core check-update --format=json --path={$docRoot} 2>&1", $updatesOutput);
+            $updates = json_decode(implode('', $updatesOutput), true) ?: [];
+        }
 
         return [
             'installed' => true,
